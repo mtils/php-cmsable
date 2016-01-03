@@ -1,0 +1,29 @@
+{
+    "name": "cmsable/framework",
+    "description": "A php cms-framework build on top of ems",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "~0.9",
+        "phpunit/phpunit": "~4.0"
+    },
+    "replace": {
+        "ems/contracts": "self.version",
+        "ems/core": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ems\\": "src/Ems"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}

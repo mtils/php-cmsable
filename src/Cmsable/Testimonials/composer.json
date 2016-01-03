@@ -1,0 +1,22 @@
+{
+    "name": "cmsable/testimonials",
+    "description": "The testimonials extension for cmsable-cms",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0",
+        "ems/contracts": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cmsable\\Testimonials\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}
