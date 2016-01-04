@@ -18,6 +18,8 @@ class FileDBTestimonial extends Model implements TestimonialContract
 
     public static $fileDBModel = 'App\File';
 
+    protected $guarded = ['id'];
+
     protected $table = 'testimonials';
 
     /**

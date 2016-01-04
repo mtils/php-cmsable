@@ -20,6 +20,8 @@ class TestimonialController extends Controller
 
     protected $notifier;
 
+    protected $translationNamespace = 'testimonials';
+
     public function __construct(Repository $repository, Notifier $notifier)
     {
         $this->repository = $repository;
@@ -57,14 +59,14 @@ class TestimonialController extends Controller
 
     public function edit($id)
     {
-        $user = $this->repository->getOrFail($id);
-        return view('testimonials.edit')->withModel($id);
+        $testimonial = $this->repository->getOrFail($id);
+        return view('testimonials.edit')->withModel($testimonial);
     }
 
     public function update(CleanedRequest $request, $id)
     {
-        $user = $this->repository->getOrFail($id);
-        $this->repository->update($user, $request->cleaned());
+        $testimonial = $this->repository->getOrFail($id);
+        $this->repository->update($testimonial, $request->cleaned());
         $this->notifier->success($this->routeMessage('updated'));
         return redirect()->route('testimonials.edit',[$id]);
     }
@@ -84,6 +86,17 @@ class TestimonialController extends Controller
 
         return 'OK';
 
+    }
+
+    public function setTranslationNamespace($namespace)
+    {
+        $this->translationNamespace = $namespace;
+        return $this;
+    }
+
+    protected function translationNamespace()
+    {
+        return $this->translationNamespace . '::';
     }
 
 }

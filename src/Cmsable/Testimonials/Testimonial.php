@@ -16,6 +16,8 @@ class Testimonial extends Model implements TestimonialContract
 
     protected $citeName = 'cite';
 
+    protected $guarded = ['id'];
+
     /**
      * @inheritdoc
      *
