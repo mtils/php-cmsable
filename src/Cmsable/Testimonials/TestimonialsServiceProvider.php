@@ -43,6 +43,7 @@ class TestimonialsServiceProvider extends ServiceProvider
         $this->registerController();
         $this->registerActions();
         $this->registerTranslations();
+        $this->registerCss();
     }
 
     protected function registerModel()
@@ -256,6 +257,24 @@ class TestimonialsServiceProvider extends ServiceProvider
                 }
             }
 
+        });
+    }
+
+    protected function registerCss()
+    {
+
+        $events = [
+            'cmsable-dist.css.testimonials.edit',
+            'cmsable-dist.css.testimonials.create'
+        ];
+
+        $this->app['events']->listen($events, function() {
+            return '@import url(https://fonts.googleapis.com/css?family=Pacifico);
+                    textarea.cite {
+                        font-family: Pacifico;
+                        font-size: 1.3em;
+                        min-height: 200px;
+                    }';
         });
     }
 
