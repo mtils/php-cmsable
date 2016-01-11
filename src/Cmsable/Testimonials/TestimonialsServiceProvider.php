@@ -86,8 +86,9 @@ class TestimonialsServiceProvider extends ServiceProvider
 
     protected function registerRepository()
     {
+        $this->app->alias('testimonials', 'Cmsable\Testimonials\Contracts\TestimonialRepository');
         $this->app->singleton('testimonials', function() {
-            return new Repository($this->app->make($this->modelInterface));
+            return new TestimonialRepository($this->app->make($this->modelInterface));
         });
     }
 
@@ -131,6 +132,19 @@ class TestimonialsServiceProvider extends ServiceProvider
         });
 
         $this->app->router->resource('testimonials', $this->controllerClass);
+
+        $app = $this->app;
+        $ns = $this->packageNamespace;
+
+        $this->app['cmsable.breadcrumbs']->register('testimonials.edit', function($breadcrumbs, $id) use ($app, $ns) {
+            $key = "$ns::actions.testimonials.edit";
+            $breadcrumbs->add($app['translator']->get($key));
+        });
+
+        $this->app['cmsable.breadcrumbs']->register('testimonials.create', function($breadcrumbs) use ($app, $ns) {
+            $key = "$ns::actions.testimonials.create";
+            $breadcrumbs->add($app['translator']->get($key));
+        });
 
     }
 
