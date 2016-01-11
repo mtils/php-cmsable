@@ -2,6 +2,7 @@
 
 namespace Cmsable\Testimonials;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Cmsable\Testimonials\Contracts\Testimonial as TestimonialContract;
 use Ems\Model\Eloquent\Model;
 use Ems\Model\Eloquent\FrontCoverByAttribute;
@@ -9,6 +10,8 @@ use Ems\Core\NamedObject;
 
 class FileDBTestimonial extends Model implements TestimonialContract
 {
+
+    use SoftDeletes;
 
     public static $originName = 'origin';
 
