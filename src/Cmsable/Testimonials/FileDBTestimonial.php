@@ -54,7 +54,7 @@ class FileDBTestimonial extends Model implements TestimonialContract
      **/
     public function getFrontCover($size=0)
     {
-        return $this->preview_image->url();
+        return $this->preview_image->url;
     }
 
     public function preview_image()
