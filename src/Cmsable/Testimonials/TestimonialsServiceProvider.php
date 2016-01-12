@@ -110,6 +110,7 @@ class TestimonialsServiceProvider extends ServiceProvider
 
         $this->app['events']->listen('resource::testimonials.query', function($query) {
             $query->leftJoinOn('preview_image');
+            $query->addQueryColumn('cite');
         });
 
     }
