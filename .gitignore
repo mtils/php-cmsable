@@ -2,3 +2,7 @@
 .env.*.php
 .env.php
 .env
+.kdev4
+*.kdev4
+**/.directory
+.kateproject*
