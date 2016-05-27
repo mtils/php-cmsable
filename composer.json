@@ -10,8 +10,8 @@
         "phpunit/phpunit": "~4.0"
     },
     "replace": {
-        "ems/contracts": "self.version",
-        "ems/core": "self.version"
+        "cmsable/testimonials": "self.version",
+        "cmsable/widgets": "self.version"
     },
     "autoload": {
         "psr-4": {
