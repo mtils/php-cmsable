@@ -18,6 +18,13 @@ class Area extends Model implements AreaContract
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'page_id' => 'integer',
+        'page_type' => 'string',
+        'name' => 'string',
+        'layout' => 'array'
+    ];
+
     /**
      * {@inheritdoc}
      *
@@ -58,6 +65,11 @@ class Area extends Model implements AreaContract
     {
         $this->setAttribute('page_id', $pageId);
         return $this;
+    }
+
+    public function items()
+    {
+        return $this->hasMany('Cmsable\Widgets\WidgetItem');
     }
 
 }

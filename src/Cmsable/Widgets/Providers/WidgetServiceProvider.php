@@ -6,6 +6,7 @@ namespace Cmsable\Widgets\Providers;
 use Illuminate\Support\ServiceProvider;
 use Cmsable\Widgets\Contracts\AreaRepository as AreaRepositoryContract;
 use Cmsable\Widgets\Contracts\Registry;
+use Collection\NestedArray;
 
 
 class WidgetServiceProvider extends ServiceProvider
@@ -25,6 +26,7 @@ class WidgetServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerWidgetRegistry();
+        $this->hookIntoPageSaving();
         $this->registerAreaRepository();
         $this->registerAreaRenderer();
         $this->registerWidgetItemRepository();
@@ -47,7 +49,7 @@ class WidgetServiceProvider extends ServiceProvider
         $interface = 'Cmsable\Widgets\Contracts\AreaRepository';
 
         $this->app->singleton($interface, function($app) use ($class, $areaClass) {
-            return new $class(new $areaClass);
+            return new $class(new $areaClass, $this->app['Cmsable\Widgets\Contracts\WidgetItemRepository']);
         });
 
     }
@@ -96,18 +98,37 @@ class WidgetServiceProvider extends ServiceProvider
         $registry->set('cmsable.widgets.samples.shout-out-box', 'Cmsable\Widgets\Samples\ShoutOutBoxWidget');
     }
 
+    protected function hookIntoPageSaving()
+    {
+        $this->app['events']->listen('sitetree.*.updated', function($form, $page){
+
+            $data = NestedArray::toNested($this->app['request']->all(),'__');
+            $areas = $this->app['Cmsable\Widgets\Contracts\AreaRepository'];
+
+            if (!isset($data['widgets'])) {
+                return;
+            }
+
+            foreach ($data['widgets'] as $areaName=>$areaData) {
+                $area = $areas->areaFor($page->getPagetypeId(), $page->getIdentifier(), $areaName);
+                $areas->update($area, $areaData);
+            }
+
+        });
+    }
+
     protected function bootRoutes()
     {
         $this->app->router->group($this->routeGroup, function($router){
 
-            $router->get('widgets',[
-                'as'   => 'widgets.index',
-                'uses' => 'WidgetController@index'
+            $router->get('widgets/{widgets}/items/{items}/edit',[
+                'as'   => 'widgets.items.edit',
+                'uses' => 'WidgetController@editItem'
             ]);
 
-            $router->get('widgets/{widgets}',[
-                'as'   => 'widgets.show',
-                'uses' => 'WidgetController@show'
+            $router->post('widgets/{widgets}/items/{items}/edit-preview',[
+                'as'   => 'widgets.items.edit-preview',
+                'uses' => 'WidgetController@editPreview'
             ]);
 
             $router->get('widgets/{widgets}/items/create',[
@@ -115,9 +136,19 @@ class WidgetServiceProvider extends ServiceProvider
                 'uses' => 'WidgetController@createItem'
             ]);
 
+            $router->get('widgets/{widgets}',[
+                'as'   => 'widgets.show',
+                'uses' => 'WidgetController@show'
+            ]);
+
             $router->post('widgets/{widgets}/items/show-if-valid',[
                 'as'   => 'widgets.items.show-if-valid',
                 'uses' => 'WidgetController@showIfValid'
+            ]);
+
+            $router->get('widgets',[
+                'as'   => 'widgets.index',
+                'uses' => 'WidgetController@index'
             ]);
 
         });

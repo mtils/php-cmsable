@@ -42,7 +42,14 @@ class WidgetController extends Controller
      **/
     public function index(Request $request)
     {
-        return view('widgets.index')->withWidgets($this->registry->all())->withHandle($request->input('handle'));
+
+        $vars = [
+            'widgets' => $this->registry->all(),
+            'handle' => $request->input('handle'),
+            'inputPrefix' => $request->input('input_prefix')
+        ];
+
+        return view('widgets.index', $vars);
     }
 
     /**
@@ -72,6 +79,12 @@ class WidgetController extends Controller
             $framed = true;
         }
 
+        $handle = $data['handle'];
+        $inputPrefix = $data['input_prefix'];
+
+        unset($data['handle']);
+        unset($data['input_prefix']);
+
         $widget = $this->registry->get($typeId);
 
         try {
@@ -85,8 +98,11 @@ class WidgetController extends Controller
         $vars = [
             'widget' => $widget,
             'widgetItem' => $item,
-            'framed' => $framed
+            'framed' => $framed,
+            'handle' => $handle,
+            'inputPrefix' => $inputPrefix
         ];
+
         return view('widget-items.show', $vars);
     }
 
@@ -95,6 +111,32 @@ class WidgetController extends Controller
         $vars = [
             'widget' => $this->registry->get($typeId),
             'widgetItem' => $this->itemRepository->make($typeId),
+            'handle' => $request->input('handle'),
+            'inputPrefix' => $request->input('input_prefix')
+        ];
+        return view('widget-items.create', $vars);
+    }
+
+    public function editPreview(Request $request, $typeId)
+    {
+
+        $vars = [
+            'widget' => $this->registry->get($typeId),
+            'widgetItem' => $this->itemRepository->make($typeId, $request->all()),
+            'handle' => $request->input('handle'),
+            'inputPrefix' => $request->input('input_prefix')
+        ];
+        return view('widget-items.create', $vars);
+    }
+
+    public function editItem(Request $request, $typeId, $itemId)
+    {
+
+        $item = $this->itemRepository->find($itemId);
+
+        $vars = [
+            'widget' => $this->registry->get($item->getTypeId()),
+            'widgetItem' => $item,
             'handle' => $request->input('handle')
         ];
         return view('widget-items.edit', $vars);

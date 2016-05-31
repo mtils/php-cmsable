@@ -3,13 +3,16 @@
 
 namespace Cmsable\Widgets\Samples;
 
+use Collection\Map\Extractor;
 use FormObject\Form;
 use Cmsable\Widgets\Contracts\Widget;
 use Cmsable\Widgets\Contracts\WidgetItem;
 use Cmsable\Widgets\Contracts\AreaRepository;
 use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
-
+use Symfony\Component\Translation\TranslatorInterface as Translator;
+use Ems\App\Http\Forms\Fields\NestedSelectField;
+use Cmsable\Model\SiteTreeModelInterface;
 
 
 
@@ -21,16 +24,24 @@ class ShoutOutBoxWidget implements Widget
 
     public static $typeId = 'cmsable.widgets.samples.shout-out-box';
 
+    /**
+     * @var \Symfony\Component\Translation\TranslatorInterface
+     **/
+    protected $lang;
+
     protected $rules = [
         'shout' => 'required|min:2|max:255',
-        'link'  => 'url'
+        'link'  => 'numeric'
     ];
 
     protected $validationFactory;
 
-    public function __construct(ValidationFactory $validationFactory)
+    public function __construct(ValidationFactory $validationFactory, Translator $translator,
+                                SiteTreeModelInterface $siteTree)
     {
         $this->validationFactory = $validationFactory;
+        $this->lang = $translator;
+        $this->siteTree = $siteTree;
     }
 
     /**
@@ -66,7 +77,7 @@ class ShoutOutBoxWidget implements Widget
      **/
     public function defaultData()
     {
-        return [ 'shout' => 'Hello I am here!' ];
+        return [ 'shout' => $this->lang->get($this->trKey('default-shout','ems::')) ];
     }
 
     /**
@@ -158,9 +169,16 @@ class ShoutOutBoxWidget implements Widget
     {
         $form = Form::create('shout-out-box');
         $form->push(Form::text('shout')->setMultiline(true));
-        $form->push(Form::text('link'));
+        $siteTreeSelect = NestedSelectField::create('link');
+        $siteTreeSelect->setModel($this->siteTree)
+                       ->setSrc([], new Extractor('id','menu_title'));
+        $form->push($siteTreeSelect);
+        $form->fillByArray($item->getData());
         return (string)$form;
     }
-    
-    
+
+    protected function trKey($key, $namespace='')
+    {
+        return $namespace . 'widgets.' . str_replace('.','/',$this->getTypeId()) . ".$key";
+    }
 }

@@ -28,6 +28,11 @@ class WidgetListField extends Field
         $this->areaRenderer = $areaRenderer;
     }
 
+    public function getWidgetConfig()
+    {
+        return json_encode([]);
+    }
+
     public function __toString()
     {
         try {
@@ -38,11 +43,14 @@ class WidgetListField extends Field
                 'field' => $this,
                 'form' => $this->getForm(),
                 'name' => $this->getPlainName(),
-                'handle' => $this->getForm()->getName() . '--'. $this->getName()
+                'handle' => $this->getForm()->getName() . '--'. $this->getName(),
+                'fullName' => $this->getName(),
+                'layoutName' => $this->getName() . "__layout",
+                'widgetConfigName' => $this->getName() . "__widget_config"
             ];
             return $this->areaRenderer->renderEditArea($area, $vars);
         } catch (\Exception $e) {
-            return get_class($e) . ': ' . $e->getMessage();
+            return get_class($e) . $e->getFile() . ':' . $e->getLine() . ' ' . $e->getMessage();
         }
 
     }
