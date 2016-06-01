@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Cmsable\Widgets\Contracts\AreaRepository as RepositoryContract;
 use Cmsable\Widgets\Contracts\WidgetItemRepository as WidgetItems;
+use Cmsable\Widgets\Contracts\Registry as RegistryContract;
 use Cmsable\Widgets\Contracts\Area;
 use Cmsable\Widgets\Contracts\WidgetItem;
 
@@ -30,16 +31,22 @@ class AreaRepository implements RepositoryContract
      **/
     protected $widgetItems;
 
+    /**
+     * @var \Cmsable\Widgets\Contracts\Registry
+     **/
+    protected $registry;
+
     public $cleanFromData = ['typeId', 'id', 'typeId', 'framed'];
 
     /**
      * @param \Illuminate\Database\Eloquent\Model $areaModel
      * @param \Cmsable\Widgets\Contracts\WidgetItemRepository $widgetItems
      **/
-    public function __construct(Model $areaModel, WidgetItems $widgetItems)
+    public function __construct(Model $areaModel, WidgetItems $widgetItems, RegistryContract $registry)
     {
         $this->areaModel = $areaModel;
         $this->widgetItems = $widgetItems;
+        $this->registry = $registry;
     }
 
     /**
@@ -156,6 +163,10 @@ class AreaRepository implements RepositoryContract
 
         if (!$items || !count($items)) {
             return $area;
+        }
+
+        foreach ($items as $item) {
+            $this->registry->get($item->getTypeId())->configure($item);
         }
 
         if ($area->layout) {

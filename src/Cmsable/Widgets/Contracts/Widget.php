@@ -39,6 +39,13 @@ interface Widget extends Renderer
     public function defaultData();
 
     /**
+     * Configure the widget when it get instantiated
+     *
+     * @param \Cmsable\Widgets\Contracts\WidgetItem $item
+     **/
+    public function configure(WidgetItem $item);
+
+    /**
      * Return a string for a category so it can be grouped in ui
      *
      * @return string

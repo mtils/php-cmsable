@@ -49,7 +49,7 @@ class WidgetServiceProvider extends ServiceProvider
         $interface = 'Cmsable\Widgets\Contracts\AreaRepository';
 
         $this->app->singleton($interface, function($app) use ($class, $areaClass) {
-            return new $class(new $areaClass, $this->app['Cmsable\Widgets\Contracts\WidgetItemRepository']);
+            return $app->make($class, [new $areaClass]);//, $this->app['Cmsable\Widgets\Contracts\WidgetItemRepository']);
         });
 
     }
@@ -96,6 +96,7 @@ class WidgetServiceProvider extends ServiceProvider
     protected function registerSampleWidgets(Registry $registry)
     {
         $registry->set('cmsable.widgets.samples.shout-out-box', 'Cmsable\Widgets\Samples\ShoutOutBoxWidget');
+        $registry->set('cmsable.widgets.samples.page-link', 'Cmsable\Widgets\Samples\PageLinkWidget');
     }
 
     protected function hookIntoPageSaving()

@@ -11,15 +11,16 @@ use Ems\App\Http\Forms\Fields\NestedSelectField;
 use Cmsable\Model\SiteTreeModelInterface;
 use Cmsable\Widgets\AbstractWidget;
 use URL;
+use Collection\StringList;
 
 
 /**
  * This is a very simple widget which shows one Sentence in a box
  **/
-class ShoutOutBoxWidget extends AbstractWidget
+class PageLinkWidget extends AbstractWidget
 {
 
-    public static $typeId = 'cmsable.widgets.samples.shout-out-box';
+    public static $typeId = 'cmsable.widgets.samples.page-link';
 
     /**
      * @var \Symfony\Component\Translation\TranslatorInterface
@@ -27,15 +28,18 @@ class ShoutOutBoxWidget extends AbstractWidget
     protected $lang;
 
     protected $rules = [
-        'shout' => 'required|min:2|max:255',
-        'link'  => 'numeric'
+        'text' => 'min:2|max:255',
+        'link'  => 'required|numeric'
     ];
+
+    protected $linkClasses;
 
     public function __construct(Translator $translator,
                                 SiteTreeModelInterface $siteTree)
     {
         $this->lang = $translator;
         $this->siteTree = $siteTree;
+        $this->linkClasses = new StringList(['page-link', 'aside-link']);
     }
 
     /**
@@ -55,7 +59,17 @@ class ShoutOutBoxWidget extends AbstractWidget
      **/
     public function defaultData()
     {
-        return [ 'shout' => $this->lang->get($this->trKey('default-shout','ems::')) ];
+        return ['text' => ''];
+    }
+    
+    /**
+     * The css classes of the a tag
+     *
+     * @return \Collection\StringList
+     **/
+    public function linkClasses()
+    {
+        return $this->linkClasses;
     }
 
     /**
@@ -67,16 +81,19 @@ class ShoutOutBoxWidget extends AbstractWidget
     public function render(WidgetItem $item)
     {
         $data = $item->getData();
+
         if (!isset($data['link'])) {
-            return $this->renderPreview($item);
+            return '';
         }
         if (!is_numeric($data['link']) || !$data['link'] ) {
-            return $this->renderPreview($item);
+            return '';
         }
         if (!$page = $this->siteTree->pageById($data['link'])) {
-            return $this->renderPreview($item);
+            return '';
         }
-        return '<a href="' . URL::to($page) . '">' . $this->renderPreview($item) . '</a>';
+
+        $text = isset($data['text']) && $data['text'] ? $data['text'] : $page->getMenuTitle();
+        return '<a class="' . $this->linkClasses . '" href="' . URL::to($page) . "\">$text</a>";
     }
 
     /**
@@ -88,11 +105,15 @@ class ShoutOutBoxWidget extends AbstractWidget
     public function renderPreview(WidgetItem $item)
     {
         $data = $item->getData();
-        if (!isset($data['shout'])) {
-            return '';
+        if (isset($data['link'])) {
+            return $this->render($item);
         }
-        $shout = $data['shout'];
-        return "<h1 class=\"shout-out\">$shout</h1>";
+        $page = $this->siteTree->pageByPath('/');
+
+        $text = isset($data['text']) && $data['text'] ? $data['text'] : $page->getMenuTitle();
+
+        return "<a class=\"{$this->linkClasses}\" href=\"javascript: return false;\">$text</a>";
+
     }
 
     /**
@@ -103,12 +124,14 @@ class ShoutOutBoxWidget extends AbstractWidget
      **/
     public function renderForm(WidgetItem $item, $params=[])
     {
-        $form = Form::create('shout-out-box');
-        $form->push(Form::text('shout')->setMultiline(true));
+        $form = Form::create('link-widget');
         $siteTreeSelect = NestedSelectField::create('link');
         $siteTreeSelect->setModel($this->siteTree)
                        ->setSrc([], new Extractor('id','menu_title'));
         $form->push($siteTreeSelect);
+
+        $form->push(Form::text('text'));
+
         $form->fillByArray($item->getData());
         return (string)$form;
     }

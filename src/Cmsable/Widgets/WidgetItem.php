@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Ems\Graphics\LayoutItemTrait;
 use Ems\Contracts\Graphics\Layout;
 use Cmsable\Widgets\Contracts\WidgetItem as WidgetItemContract;
+use Collection\StringList;
 
 
 class WidgetItem extends Model implements WidgetItemContract
@@ -18,6 +19,11 @@ class WidgetItem extends Model implements WidgetItemContract
     protected $table = 'widget_items';
 
     protected $guarded = ['id'];
+
+    /**
+     * @var \Collection\StringList
+     **/
+    protected $_cssClasses;
 
     /**
      * The attributes that should be casted to native types.
@@ -70,6 +76,24 @@ class WidgetItem extends Model implements WidgetItemContract
     public function area()
     {
         return $this->belongsTo('Cmsable\Widgets\Area');
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return \Collection\StringList
+     **/
+    public function cssClasses()
+    {
+        if (!$this->_cssClasses) {
+            $typeParts = explode('.',$this->getTypeId());
+            $partCount = count($typeParts);
+            $lastPart = $partCount > 1 ? $typeParts[$partCount-1] : implode('_',$typeParts);
+            $this->_cssClasses = new StringList([
+                $lastPart
+            ]);
+        }
+        return $this->_cssClasses;
     }
 
 }

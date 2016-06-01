@@ -32,4 +32,11 @@ interface WidgetItem extends LayoutItem, Identifiable
      **/
     public function getData();
 
+    /**
+     * Return some css classes identifying this widget
+     *
+     * @return \Collection\StringList
+     **/
+    public function cssClasses();
+
 }

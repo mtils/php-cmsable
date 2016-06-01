@@ -79,7 +79,13 @@ class WidgetItemRepository implements RepositoryContract
             throw new ModelNotFoundException;
         }
 
-        return $this->model->findOrFail($id);
+        $item = $this->model->findOrFail($id);
+
+        $widget = $this->registry->get($item->getTypeId());
+
+        $widget->configure($item);
+
+        return $item;
     }
 
      /**
@@ -105,11 +111,15 @@ class WidgetItemRepository implements RepositoryContract
      **/
     public function make($typeId, array $data=[])
     {
-        $defaults = $this->registry->get($typeId)->defaultData();
+
+        $widget = $this->registry->get($typeId);
+        $defaults = $widget->defaultData();
         $data = array_merge($defaults, $data);
         $item = $this->model->newInstance();
         $item->setAttribute($this->typeIdKey, $typeId);
         $item->setAttribute($this->dataKey, $data);
+
+        $widget->configure($item);
 
         if (isset($data[$this->idKey])) {
             $item->setAttribute($this->idKey, $data[$this->idKey]);
