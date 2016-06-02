@@ -1,0 +1,23 @@
+{
+    "name": "cmsable/contacts",
+    "description": "The contacts/profiles extension for cmsable-cms",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0",
+        "ems/contracts": "dev-master",
+        "cmsable/addresses": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cmsable\\Contacts\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}

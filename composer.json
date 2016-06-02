@@ -11,7 +11,9 @@
     },
     "replace": {
         "cmsable/testimonials": "self.version",
-        "cmsable/widgets": "self.version"
+        "cmsable/widgets": "self.version",
+        "cmsable/addresses": "self.version",
+        "cmsable/contacts": "self.version",
     },
     "autoload": {
         "psr-4": {
