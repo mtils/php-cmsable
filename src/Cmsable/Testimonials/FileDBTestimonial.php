@@ -7,11 +7,15 @@ use Cmsable\Testimonials\Contracts\Testimonial as TestimonialContract;
 use Ems\Model\Eloquent\Model;
 use Ems\Model\Eloquent\FrontCoverByAttribute;
 use Ems\Core\NamedObject;
+use Ems\Contracts\Model\Relation\Tag\HoldsTags;
+use Ems\Model\Relation\Tag\HoldsTagsTrait;
+use Ems\Contracts\Core\AppliesToResource;
 
-class FileDBTestimonial extends Model implements TestimonialContract
+class FileDBTestimonial extends Model implements TestimonialContract, HoldsTags, AppliesToResource
 {
 
     use SoftDeletes;
+    use HoldsTagsTrait;
 
     public static $originName = 'origin';
 
@@ -24,6 +28,7 @@ class FileDBTestimonial extends Model implements TestimonialContract
     protected $guarded = ['id'];
 
     protected $table = 'testimonials';
+
 
     /**
      * @inheritdoc
@@ -60,6 +65,17 @@ class FileDBTestimonial extends Model implements TestimonialContract
     public function preview_image()
     {
         return $this->belongsTo(static::$fileDBModel);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Ems\Contracts\Core\AppliesToResource
+     * @return string
+     **/
+    public function resourceName()
+    {
+        return 'testimonials';
     }
 
 }

@@ -6,6 +6,7 @@ return [
         'fields' => [
             'id'            => 'ID',
             'origin'        => 'Person',
+            'show_on_homepage'        => 'Auf Startseite anzeigen',
             'preview_image' => 'Bild',
             'cite'          => 'Zitat',
             'created_at'    => 'Erzeugt',

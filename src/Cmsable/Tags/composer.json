@@ -1,0 +1,23 @@
+{
+    "name": "cmsable/tags",
+    "description": "The tags extension for cmsable-cms",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0",
+        "ems/contracts": "dev-master",
+        "ems/tags": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cmsable\\Tags\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}

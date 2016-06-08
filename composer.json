@@ -10,10 +10,12 @@
         "phpunit/phpunit": "~4.0"
     },
     "replace": {
+        "cmsable/contracts": "self.version",
         "cmsable/testimonials": "self.version",
         "cmsable/widgets": "self.version",
         "cmsable/addresses": "self.version",
         "cmsable/contacts": "self.version",
+        "cmsable/tags": "self.version"
     },
     "autoload": {
         "psr-4": {

@@ -34,6 +34,9 @@ class TestimonialsServiceProvider extends ServiceProvider
         $this->registerModel();
         $this->registerRepository();
         $this->configureModelPresenter();
+        $this->app['events']->listen('form.fields-setted.testimonial-form', function($fields) {
+            $this->addTagFieldIfAvailable($fields);
+        });
     }
 
     public function boot()
@@ -88,8 +91,49 @@ class TestimonialsServiceProvider extends ServiceProvider
     {
         $this->app->alias('testimonials', 'Cmsable\Testimonials\Contracts\TestimonialRepository');
         $this->app->singleton('testimonials', function() {
-            return new TestimonialRepository($this->app->make($this->modelInterface));
+            $repo = new TestimonialRepository($this->app->make($this->modelInterface));
+            $repo->stored(function($model, $attributes){$this->syncTagsWhenStoredOrUpdated($model, $attributes);});
+            $repo->updated(function($model, $attributes){$this->syncTagsWhenStoredOrUpdated($model, $attributes);});
+            return $repo;
         });
+    }
+
+    protected function syncTagsWhenStoredOrUpdated($model, $attributes)
+    {
+        if (!$this->isTagExtensionEnabled()) {
+            return;
+        }
+
+        $this->assignTagsByArray($model, $attributes);
+
+        $repo = $this->app->make('Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository');
+
+        $repo->syncTags($model);
+
+    }
+
+    protected function assignTagsByArray($model, $attributes)
+    {
+
+        $model->setTags([]);
+
+        if (!isset($attributes['tags'])) {
+            return;
+        }
+
+        if (!isset($attributes['tags']['ids'])) {
+            return;
+        }
+
+        if (!$attributes['tags']['ids']) {
+            return;
+        }
+
+        $repo = $this->app->make('Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository');
+
+        foreach ($attributes['tags']['ids'] as $id) {
+            $model->attachTag($repo->getOrFail($id));
+        }
     }
 
     protected function configureModelPresenter()
@@ -113,6 +157,15 @@ class TestimonialsServiceProvider extends ServiceProvider
             $query->addQueryColumn('cite');
         });
 
+    }
+
+    protected function addTagFieldIfAvailable($fields)
+    {
+        if (!$this->isTagExtensionEnabled()) {
+            return;
+        }
+        $field = $this->app->make('Cmsable\Tags\FormFields\TagField');
+        $fields->push($field)->after('cite');
     }
 
     protected function registerController()
@@ -313,6 +366,11 @@ class TestimonialsServiceProvider extends ServiceProvider
             return $this->packagePath . "/$dir";
         }
         return $this->packagePath;
+    }
+    
+    protected function isTagExtensionEnabled()
+    {
+        return $this->app->bound('Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository');
     }
 
 }
