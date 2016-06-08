@@ -132,7 +132,11 @@ class TestimonialsServiceProvider extends ServiceProvider
         $repo = $this->app->make('Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository');
 
         foreach ($attributes['tags']['ids'] as $id) {
-            $model->attachTag($repo->getOrFail($id));
+            if (is_numeric($id)) {
+                $model->attachTag($repo->getOrFail($id));
+                continue;
+            }
+            $model->attachTag($repo->getByNameOrCreate($id));
         }
     }
 
@@ -165,6 +169,7 @@ class TestimonialsServiceProvider extends ServiceProvider
             return;
         }
         $field = $this->app->make('Cmsable\Tags\FormFields\TagField');
+        $field->allowNewTags(true);
         $fields->push($field)->after('cite');
     }
 

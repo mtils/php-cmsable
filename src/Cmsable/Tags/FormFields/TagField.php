@@ -10,6 +10,7 @@ use Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository;
 use Collection\Map\Extractor;
 use FormObject\Field\SelectableProxy;
 use Symfony\Component\Translation\TranslatorInterface as Lang;
+use FormObject\Attributes;
 
 class TagField extends SelectManyField
 {
@@ -19,6 +20,8 @@ class TagField extends SelectManyField
     protected $modelValue;
 
     protected $lang;
+
+    protected $newTagsEnabled = false;
 
     public function __construct(GlobalTaggingRepository $repo, Lang $lang)
     {
@@ -66,6 +69,23 @@ class TagField extends SelectManyField
             }
         }
         return FALSE;
+    }
+
+    public function updateAttributes(Attributes $attributes){
+        parent::updateAttributes($attributes);
+        if ($this->areNewTagsAllowed()) {
+            $attributes['data-allow-new'] = 'true';
+        }
+    }
+
+    public function areNewTagsAllowed()
+    {
+        return $this->newTagsEnabled;
+    }
+
+    public function allowNewTags($allow=true)
+    {
+        $this->newTagsEnabled = $allow;
     }
 
     protected function fillByRepository()
