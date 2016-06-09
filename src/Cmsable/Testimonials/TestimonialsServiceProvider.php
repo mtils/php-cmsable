@@ -150,7 +150,7 @@ class TestimonialsServiceProvider extends ServiceProvider
 //                     return ['id', 'origin.name'];
 //                 }
 
-                return ['id', 'origin', 'preview_image.url', 'created_at'];
+                return ['id', 'preview_image', 'origin', 'created_at'];
 
             });
         });
