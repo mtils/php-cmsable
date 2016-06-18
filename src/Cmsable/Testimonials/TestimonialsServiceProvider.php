@@ -293,12 +293,20 @@ class TestimonialsServiceProvider extends ServiceProvider
             $pageType = PageType::create('cmsable.testimonials-page')
                                   ->setCategory('default')
                                   ->setTargetPath('testimonials')
-                                  ->setLangKey($this->packageNamespace.'::pagetypes');
+                                  ->setLangKey($this->packageNamespace.'::pagetypes')
+                                  ->setFormPluginClass('Cmsable\Testimonials\SiteTreePlugins\TestimonialsPagePlugin')
+                                  ->setControllerCreatorClass('Cmsable\Testimonials\Cms\TestimonialControllerCreator');
 
             $pageTypes->add($pageType);
 
-
         });
+
+        $this->app->afterResolving('Cmsable\PageType\ConfigTypeRepositoryInterface', function($repo){
+            $repo->setTemplate('cmsable.testimonials-page', [
+                'filter_tags_ids' => []
+            ]);
+        });
+
     }
 
     protected function registerAdminPage()
