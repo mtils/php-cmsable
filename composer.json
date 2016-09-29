@@ -15,7 +15,8 @@
         "cmsable/widgets": "self.version",
         "cmsable/addresses": "self.version",
         "cmsable/contacts": "self.version",
-        "cmsable/tags": "self.version"
+        "cmsable/tags": "self.version",
+        "cmsable/blog": "self.version"
     },
     "autoload": {
         "psr-4": {
