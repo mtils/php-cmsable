@@ -244,6 +244,21 @@ class BlogEntry extends Model implements BlogEntryContract, HoldsTags, AppliesTo
     /**
      * {@inheritdoc}
      *
+     * @param  array  $attributes
+     * @param  bool  $exists
+     * @return static
+     */
+    public function newInstance($attributes = [], $exists = false)
+    {
+        if (!isset($attributes['blog_date'])) {
+            $attributes['blog_date'] = new DateTime;
+        }
+        return parent::newInstance($attributes, $exists);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @see \Ems\Contracts\Core\AppliesToResource
      * @return string
      **/
