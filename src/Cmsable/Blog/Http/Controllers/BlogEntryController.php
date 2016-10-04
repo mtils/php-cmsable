@@ -112,4 +112,21 @@ class BlogEntryController extends Controller
         return redirect()->route('blog-entries.edit',[$id]);
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function destroy($id)
+    {
+
+        $this->repository->delete($this->repository->getOrFail($id));
+
+        $this->notifier->success($this->routeMessage('destroyed'));
+
+        return 'OK';
+
+    }
+
 }
