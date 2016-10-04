@@ -6,6 +6,7 @@ use Forms;
 use FormObject\Form;
 use Cmsable\Resource\Contracts\ResourceForm;
 use Ems\App\Services\Casting\TypeIntrospectorCaster as Caster;
+use Ems\Contracts\Core\TextProvider;
 
 class BlogEntryForm extends Form implements ResourceForm
 {
@@ -22,15 +23,19 @@ class BlogEntryForm extends Form implements ResourceForm
         'preview_content'      => 'min:8|max:2048',
         'priority'             => 'in:1,4,8,12,16',
         'publish_at'           => 'local_date',
-        'blog_date'            => 'local_date'
+        'blog_date'            => 'required|local_date'
 
     ];
 
     protected $caster;
 
-    public function __construct(Caster $caster)
+    protected $texts;
+
+    public function __construct(Caster $caster, TextProvider $texts)
     {
         $this->caster = $caster;
+        $this->texts = $texts->forNamespace('cmsable-blog')
+                             ->forDomain('models.blog_entry');
     }
 
     public function resourceName()
@@ -56,8 +61,8 @@ class BlogEntryForm extends Form implements ResourceForm
         $images = Forms::fieldList('images')->addCssClass('horizontal-split');
 
         $images->push(
-            Forms::imageDbField('image_id', 'Bild'),
-            Forms::imageDbField('preview_image_id', 'Vorschau-Bild')
+            Forms::imageDbField('image_id')->setTitle($this->texts->get('fields.image')),
+            Forms::imageDbField('preview_image_id')->setTitle($this->texts->get('fields.preview_image'))
         );
 
         $topicAndDate = Forms::fieldList('topic_date')->addCssClass('horizontal-split');
@@ -69,7 +74,7 @@ class BlogEntryForm extends Form implements ResourceForm
 
         $mainFields->push(
             $images,
-            Forms::text('title')->setTitle(trans('cmsable::models.page.fields.title'))->addCssClass('input-lg'),
+            Forms::text('title')->addCssClass('input-lg'),
             $topicAndDate,
             Forms::html('content')
         );
@@ -78,8 +83,8 @@ class BlogEntryForm extends Form implements ResourceForm
         $settingFields->setSwitchable(TRUE);
 
         $settingFields->push(
-            Forms::text('url_segment')->setTitle(trans('cmsable::models.page.fields.url_segment')),
-            Forms::text('menu_title')->setTitle(trans('cmsable::models.page.fields.menu_title')),
+            Forms::text('url_segment'),
+            Forms::text('menu_title'),
             $this->priorityField()
         );
 
