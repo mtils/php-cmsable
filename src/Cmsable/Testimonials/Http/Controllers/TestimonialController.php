@@ -4,7 +4,7 @@ namespace Cmsable\Testimonials\Http\Controllers;
 
 
 use App\Http\Controllers\Controller;
-use Ems\Contracts\Core\Repository;
+use Ems\Contracts\Model\Repository;
 use Ems\App\Helpers\ProvidesTexts;
 use Cmsable\View\Contracts\Notifier;
 use Cmsable\Http\Resource\SearchRequest;

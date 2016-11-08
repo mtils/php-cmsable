@@ -3,7 +3,7 @@
 
 namespace Cmsable\Blog\Contracts;
 
-use Ems\Contracts\Core\ExtendableRepository;
+use Ems\Contracts\Model\ExtendableRepository;
 
 
 

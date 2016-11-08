@@ -4,7 +4,6 @@ namespace Cmsable\Blog\Http\Controllers;
 
 
 use App\Http\Controllers\Controller;
-use Ems\Contracts\Core\Repository;
 use Ems\App\Helpers\ProvidesTexts;
 use Cmsable\Blog\Contracts\BlogEntryRepository;
 use Cmsable\View\Contracts\Notifier;
