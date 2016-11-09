@@ -64,7 +64,7 @@ class BlogEntry extends Model implements BlogEntryContract, HoldsTags, AppliesTo
      *
      * @param int $size (optional)
      * @return string
-     * @see \Ems\Contracts\Core\HasFrontCover
+     * @see \Ems\Contracts\Model\HasFrontCover
      **/
     public function getFrontCover($size=0)
     {
@@ -88,7 +88,7 @@ class BlogEntry extends Model implements BlogEntryContract, HoldsTags, AppliesTo
      * {@inheritdoc}
      *
      * @return string
-     * @see \Ems\Contracts\Core\HasContent
+     * @see \Ems\Contracts\Model\HasContent
      **/
     public function getContent()
     {
@@ -99,7 +99,7 @@ class BlogEntry extends Model implements BlogEntryContract, HoldsTags, AppliesTo
      * {@inheritdoc}
      *
      * @return string
-     * @see \Ems\Contracts\Core\HasContent
+     * @see \Ems\Contracts\Model\HasContent
      **/
     public function getContentMimeType()
     {
@@ -110,7 +110,7 @@ class BlogEntry extends Model implements BlogEntryContract, HoldsTags, AppliesTo
      * {@inheritdoc}
      *
      * @return \Ems\Contracts\Core\Identifiable
-     * @see \Ems\Contracts\Core\HasOwner
+     * @see \Ems\Contracts\Model\HasOwner
      **/
     public function getOwner()
     {

@@ -3,9 +3,9 @@
 
 namespace Cmsable\Blog\Contracts;
 
-use Ems\Contracts\Core\HasFrontCover;
-use Ems\Contracts\Core\HasContent;
-use Ems\Contracts\Core\HasOwner;
+use Ems\Contracts\Model\HasFrontCover;
+use Ems\Contracts\Model\HasContent;
+use Ems\Contracts\Model\HasOwner;
 
 
 interface BlogEntry extends HasFrontCover, HasContent, HasOwner

@@ -3,7 +3,7 @@
 namespace Cmsable\Testimonials\Contracts;
 
 
-use Ems\Contracts\Core\HasFrontCover;
+use Ems\Contracts\Model\HasFrontCover;
 
 
 interface Testimonial extends HasFrontCover
