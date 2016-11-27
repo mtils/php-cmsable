@@ -34,7 +34,7 @@ class BlogEntryController extends Controller
         $this->notifier = $notifier;
         $this->auth = $auth;
         $this->middleware('auth', [
-            'except' => ['index', 'show']
+            'only'   => ['store', 'create', 'destroy', 'update', 'edit']
         ]);
     }
 
