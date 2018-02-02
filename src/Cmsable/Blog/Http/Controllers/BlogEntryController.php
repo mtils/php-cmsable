@@ -24,7 +24,7 @@ class BlogEntryController extends Controller
     protected $auth;
 
     protected $searchDefaults = [
-        'sort'  =>'created_at',
+        'sort'  =>'blog_date',
         'order' => 'desc'
     ];
 
