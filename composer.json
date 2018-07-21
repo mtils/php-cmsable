@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ems\\": "src/Ems"
+            "Cmsable\\": "src/Cmsable"
         }
     },
     "license": "MIT",
