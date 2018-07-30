@@ -9,7 +9,7 @@ use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository;
 use Collection\Map\Extractor;
 use FormObject\Field\SelectableProxy;
-use Symfony\Component\Translation\TranslatorInterface as Lang;
+use Illuminate\Translation\Translator as Lang;
 use FormObject\Attributes;
 
 class TagField extends SelectManyField

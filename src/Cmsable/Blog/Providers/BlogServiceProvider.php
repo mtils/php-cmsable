@@ -104,15 +104,15 @@ class BlogServiceProvider extends ServiceProvider
 
             $modelClass = $criteria->modelClass();
 
-            $builder = $this->app->make('Cmsable\Blog\Search\BlogQueryBuilder', [new $modelClass]);            
+            $builder = $this->app->make('Cmsable\Blog\Search\BlogQueryBuilder', ['model' => new $modelClass]);
 
             if ($this->isTagExtensionEnabled()) {
                 $builder->setTagQueryHelper($this->app->make('Ems\Model\Eloquent\TagQueryHelper'));
             }
 
             $search = $this->app->make('Versatile\Search\BuilderSearch',[
-                $builder,
-                $criteria
+                'builder' => $builder,
+                'criteria' => $criteria
             ]);
 
             $search->onBuilding(function($builder) {

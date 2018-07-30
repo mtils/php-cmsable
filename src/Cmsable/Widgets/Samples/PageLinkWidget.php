@@ -6,7 +6,7 @@ namespace Cmsable\Widgets\Samples;
 use Collection\Map\Extractor;
 use FormObject\Form;
 use Cmsable\Widgets\Contracts\WidgetItem;
-use Symfony\Component\Translation\TranslatorInterface as Translator;
+use Illuminate\Translation\Translator;
 use Ems\App\Http\Forms\Fields\NestedSelectField;
 use Cmsable\Model\SiteTreeModelInterface;
 use Cmsable\Widgets\AbstractWidget;

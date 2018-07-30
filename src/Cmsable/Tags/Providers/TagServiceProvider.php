@@ -23,7 +23,7 @@ class TagServiceProvider extends ServiceProvider
     {
         $interface = 'Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository';
         $this->app->singleton($interface, function($app){
-            return $app->make('Ems\Model\Eloquent\GlobalTaggingRepository', [$app->make($this->tagClass())]);
+            return $app->make('Ems\Model\Eloquent\GlobalTaggingRepository', ['tag' => $app->make($this->tagClass())]);
         });
     }
 

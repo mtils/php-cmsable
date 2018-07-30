@@ -3,10 +3,9 @@
 
 namespace Cmsable\Widgets\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Cmsable\Widgets\Contracts\AreaRepository as AreaRepositoryContract;
 use Cmsable\Widgets\Contracts\Registry;
 use Collection\NestedArray;
+use Illuminate\Support\ServiceProvider;
 
 
 class WidgetServiceProvider extends ServiceProvider
@@ -49,7 +48,7 @@ class WidgetServiceProvider extends ServiceProvider
         $interface = 'Cmsable\Widgets\Contracts\AreaRepository';
 
         $this->app->singleton($interface, function($app) use ($class, $areaClass) {
-            return $app->make($class, [new $areaClass]);//, $this->app['Cmsable\Widgets\Contracts\WidgetItemRepository']);
+            return $app->make($class, ['areaModel' => new $areaClass]);//, $this->app['Cmsable\Widgets\Contracts\WidgetItemRepository']);
         });
 
     }
@@ -87,7 +86,7 @@ class WidgetServiceProvider extends ServiceProvider
         $this->app->alias('cmsable.widgets.items', $interface);
 
         $this->app->singleton($interface, function($app) use ($class, $modelClass){
-            return $this->app->make($class, [new $modelClass]);
+            return $this->app->make($class, ['model' => new $modelClass]);
         });
 
 
@@ -101,8 +100,9 @@ class WidgetServiceProvider extends ServiceProvider
 
     protected function hookIntoPageSaving()
     {
-        $this->app['events']->listen('sitetree.*.updated', function($form, $page){
-
+        $this->app['events']->listen('sitetree.*.updated', function($eventName, array $args){
+            $form = $args[0];
+            $page = $args[1];
             $data = NestedArray::toNested($this->app['request']->all(),'__');
             $areas = $this->app['Cmsable\Widgets\Contracts\AreaRepository'];
 
