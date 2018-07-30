@@ -6,3 +6,4 @@
 *.kdev4
 **/.directory
 .kateproject*
+.idea
