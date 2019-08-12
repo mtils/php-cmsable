@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "php": ">=5.4.0",
-	"ems/framework": "0.3.*"
+	    "ems/framework": "0.3.*"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
