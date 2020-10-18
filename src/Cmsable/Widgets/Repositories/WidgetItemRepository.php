@@ -51,7 +51,7 @@ class WidgetItemRepository implements RepositoryContract
 
     /**
      * _C_msable_W_idgets_R_epositories_W_idget_I_tem_R_epository = cwrwir
-     * 
+     *
      * @var string
      **/
     protected $idPrefix = 'cwrwir';
@@ -121,7 +121,7 @@ class WidgetItemRepository implements RepositoryContract
 
         $widget->configure($item);
 
-        if (isset($data[$this->idKey])) {
+        if (isset($data[$this->idKey]) && $data[$this->idKey]) {
             $item->setAttribute($this->idKey, $data[$this->idKey]);
             return $item;
         }

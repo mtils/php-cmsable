@@ -43,7 +43,7 @@ class WidgetItem extends Model implements WidgetItemContract
      **/
     public function getId()
     {
-        return $this->getKey();
+        return $this->getAttributeFromArray($this->getKeyName());
     }
 
     /**
