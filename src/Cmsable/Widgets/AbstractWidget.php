@@ -6,7 +6,7 @@ namespace Cmsable\Widgets;
 use Cmsable\Widgets\Contracts\Widget;
 use Cmsable\Widgets\Contracts\WidgetItem as ItemContract;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
-use Illuminate\Contracts\Validation\ValidationException;
+use Illuminate\Validation\ValidationException;
 use Cmsable\Widgets\Contracts\AreaRepository;
 use App;
 
@@ -38,13 +38,18 @@ abstract class AbstractWidget implements Widget
      *
      * @param array
      * @return bool
+     *
      * @throws \Illuminate\Contracts\Validation\ValidationException
+     * @throws ValidationException
      **/
     public function validate(array $data)
     {
         $validator = $this->createValidator($data, $this->rules);
         if ($validator->passes()) {
             return true;
+        }
+        if (class_exists('\Illuminate\Contracts\Validation\ValidationException')) {
+            throw new \Illuminate\Contracts\Validation\ValidationException($validator);
         }
         throw new ValidationException($validator);
     }
