@@ -3,9 +3,13 @@
 
 namespace Cmsable\Widgets\Providers;
 
+use Cmsable\PageType\PageType;
 use Cmsable\Widgets\Contracts\Registry;
 use Collection\NestedArray;
 use Illuminate\Support\ServiceProvider;
+use Cmsable\Widgets\SiteTreePlugins\WidgetAnchorPlugin;
+
+use function realpath;
 
 
 class WidgetServiceProvider extends ServiceProvider
@@ -17,13 +21,19 @@ class WidgetServiceProvider extends ServiceProvider
         'namespace' =>  'Cmsable\Widgets\Http\Controllers'
     ];
 
+    protected $packageNamespace = 'widgets';
+
+    protected $packagePath = '';
+
     public function boot()
     {
         $this->bootRoutes();
+        $this->loadTranslationsFrom($this->resourcePath('lang'), $this->packageNamespace);
     }
 
     public function register()
     {
+        $this->registerPageType();
         $this->registerWidgetRegistry();
         $this->hookIntoPageSaving();
         $this->registerAreaRepository();
@@ -153,6 +163,44 @@ class WidgetServiceProvider extends ServiceProvider
             ]);
 
         });
+    }
+
+    protected function registerPageType()
+    {
+        $this->app['events']->listen('cmsable.pageTypeLoadRequested', function($pageTypes) {
+
+            $pageType = PageType::create('cmsable.widget-anchor')
+                ->setCategory('default')
+                ->setTargetPath('cms-redirect')
+                ->setLangKey($this->packageNamespace.'::pagetypes')
+                ->setFormPluginClass(WidgetAnchorPlugin::class);
+
+            $pageTypes->add($pageType);
+
+        });
+
+    }
+
+    protected function resourcePath($dir='')
+    {
+        $resourcePath = $this->packagePath('resources');
+
+        if ($dir) {
+            return "$resourcePath/$dir";
+        }
+
+        return $resourcePath;
+    }
+
+    protected function packagePath($dir='')
+    {
+        if (!$this->packagePath) {
+            $this->packagePath = realpath(__DIR__.'/..');
+        }
+        if ($dir) {
+            return $this->packagePath . "/$dir";
+        }
+        return $this->packagePath;
     }
 
     protected function areaRepositoryClass()

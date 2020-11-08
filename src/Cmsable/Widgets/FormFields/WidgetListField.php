@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets\FormFields;
 
+use Cmsable\Widgets\Contracts\Area;
 use FormObject\Field;
 
 use Cmsable\Widgets\Contracts\AreaRepository;
@@ -21,6 +22,11 @@ class WidgetListField extends Field
      * @var \Cmsable\Widgets\Contracts\AreaRenderer
      **/
     protected $areaRenderer;
+
+    /**
+     * @var Area
+     */
+    private $area;
 
     public function __construct(AreaRepository $areaRepository, AreaRenderer $areaRenderer)
     {
@@ -55,8 +61,11 @@ class WidgetListField extends Field
 
     }
 
-    protected function getArea()
+    public function getArea()
     {
+        if ($this->area) {
+            return $this->area;
+        }
         if (!$page = $this->getPage()) {
             return;
         }
@@ -64,6 +73,12 @@ class WidgetListField extends Field
         return $this->areaRepository->areaFor($page->getPageTypeId(),
                                               $page->getIdentifier(),
                                               $this->getPlainName());
+    }
+
+    public function setArea(Area $area=null)
+    {
+        $this->area = $area;
+        return $this;
     }
 
     protected function getPage()

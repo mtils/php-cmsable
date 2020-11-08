@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use OutOfBoundsException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -11,6 +12,9 @@ use Cmsable\Widgets\Contracts\WidgetItemRepository as WidgetItems;
 use Cmsable\Widgets\Contracts\Registry as RegistryContract;
 use Cmsable\Widgets\Contracts\Area;
 use Cmsable\Widgets\Contracts\WidgetItem;
+use Cmsable\Widgets\Area as AreaModel;
+
+use function is_array;
 
 class AreaRepository implements RepositoryContract
 {
@@ -50,12 +54,25 @@ class AreaRepository implements RepositoryContract
     }
 
     /**
+     * @param array $criteria
+     *
+     * @return AreaModel[]
+     */
+    public function find(array $criteria = [])
+    {
+        /** @var AreaModel[] $areas */
+        $areas = $this->makeAreaQuery($criteria)->get()->all();
+        return $areas;
+    }
+
+
+    /**
      * {@inheritdoc}
      *
      * @param string $pageTypeId
      * @param int $pageId (optional)
      * @param string $name (optional)
-     * @return \Cmsable\Widgets\Contracts\Area
+     * @return Area
      **/
     public function areaFor($pageTypeId, $pageId=null, $name=self::CONTENT)
     {
@@ -71,7 +88,7 @@ class AreaRepository implements RepositoryContract
     /**
      * {@inheritdoc}
      *
-     * @param \Cmsable\Widgets\Contracts\Area $area
+     * @param Area $area
      * @param array $attributes
      * @return self
      **/
@@ -126,34 +143,13 @@ class AreaRepository implements RepositoryContract
         return $this;
 
     }
-    
-    protected function areaItems(Area $area)
-    {
-        $items = [];
-        foreach ($area as $item) {
-            $items[] = $item;
-        }
-        return $items;
-    }
 
-    protected function isInItems(WidgetItem $item, array $items)
-    {
-        foreach ($items as $checkItem) {
-            if ($item->getId() == $checkItem->getId()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected function deleteItems($items)
-    {
-        foreach ($items as $item) {
-            $this->widgetItems->delete($item);
-        }
-    }
-
-    protected function configure(Area $area)
+    /**
+     * @param Area $area
+     *
+     * @return Area
+     */
+    public function configure(Area $area)
     {
         if (!$area->exists) {
             return $area;
@@ -182,7 +178,33 @@ class AreaRepository implements RepositoryContract
 
         return $area;
     }
-    
+
+    protected function areaItems(Area $area)
+    {
+        $items = [];
+        foreach ($area as $item) {
+            $items[] = $item;
+        }
+        return $items;
+    }
+
+    protected function isInItems(WidgetItem $item, array $items)
+    {
+        foreach ($items as $checkItem) {
+            if ($item->getId() == $checkItem->getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function deleteItems($items)
+    {
+        foreach ($items as $item) {
+            $this->widgetItems->delete($item);
+        }
+    }
+
     protected function addItemsByLayout(Area $area, $layout, $items)
     {
 
@@ -208,11 +230,46 @@ class AreaRepository implements RepositoryContract
 
     protected function getAreaFromDatabase($pageTypeId, $pageId, $name)
     {
-        return $this->areaModel
-                    ->where($this->areaPageTypeKey, $pageTypeId)
-                    ->where($this->pageIdKey, $pageId)
-                    ->where($this->nameKey, $name)
-                    ->first();
+        $criteria = [
+            'page_type_id' => $pageTypeId,
+            'page_id'      => $pageId,
+            'name'         => $name
+        ];
+
+        return $this->makeAreaQuery($criteria)->first();
+    }
+
+    /**
+     * @param array $criteria (optional)
+     *
+     * @return Builder
+     */
+    protected function makeAreaQuery(array $criteria=[])
+    {
+        $query = $this->areaModel->newQuery();
+        foreach ($criteria as $key=>$criterion) {
+            $key = $key == 'page_type_id' ? 'page_type' : $key;
+            $this->addCriteria($query, $key, $criterion);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Builder $builder
+     * @param string  $key
+     * @param mixed   $value
+     */
+    protected function addCriteria(Builder $builder, $key, $value)
+    {
+        if ($value === null) {
+            $builder->whereNull($key);
+            return;
+        }
+        if (is_array($value)) {
+            $builder->whereIn($key, $value);
+            return;
+        }
+        $builder->where($key, $value);
     }
 
     protected function newArea($pageTypeId, $pageId, $name)

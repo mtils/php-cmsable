@@ -66,6 +66,21 @@ class WidgetItem extends Model implements WidgetItemContract
         return $this->getAttribute('data');
     }
 
+    /**
+     * @return Layout
+     */
+    public function getLayout()
+    {
+        if ($this->_layout) {
+            return $this->_layout;
+        }
+        if ($area = $this->getRelationValue('area')) {
+            $this->_layout = $area;
+        }
+        return $this->_layout;
+    }
+
+
     public function setLayout(Layout $layout)
     {
         $this->_layout = $layout;
