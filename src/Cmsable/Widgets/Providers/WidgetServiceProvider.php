@@ -162,6 +162,16 @@ class WidgetServiceProvider extends ServiceProvider
                 'uses' => 'WidgetController@index'
             ]);
 
+            $router->get('widget-items',[
+                'as'   => 'widget-items.index',
+                'uses' => 'WidgetItemController@index'
+            ]);
+
+            $router->get('widget-items/{widget_item}',[
+                'as'   => 'widget-items.show',
+                'uses' => 'WidgetItemController@show'
+            ]);
+
         });
     }
 

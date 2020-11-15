@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets\Http\Controllers;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Cmsable\Http\Resource\CleanedRequest;
@@ -19,7 +20,7 @@ class WidgetItemController extends Controller
      * @var \Cmsable\Widgets\Contracts\Registry
      **/
     protected $registry;
-    
+
     /**
      * @var WidgetItemRepository
      **/
@@ -37,22 +38,51 @@ class WidgetItemController extends Controller
     /**
      * Shows a list of all available widgets
      *
-     * @return Illuminate\Contracts\View\View
+     * @return View
      **/
-    public function index()
+    public function index(Request $request)
     {
-        return view('widgets.index')->withWidgets($this->registry->all());
+        $criteria = [];
+        foreach (['area_id', 'type_id'] as $key) {
+            if ($value = $request->get($key)) {
+                $criteria[$key] = $value;
+            }
+        }
+        $vars = [
+            'widgetRegistry' => $this->registry,
+            'handle' => $request->input('handle'),
+            'inputPrefix' => $request->input('input_prefix'),
+            'items' => $this->repository->search($criteria)
+        ];
+        return view('widget-items.index', $vars);
     }
 
     /**
      * Shows a detailed view of one widget (for example a preview)
      *
-     * @param string $typeId
-     * @return Illuminate\Contracts\View\View
-     **/
-    public function show($typeId)
+     * @param Request $request
+     * @param string $id
+     *
+     * @return View
+     */
+    public function show(Request $request, $id)
     {
-        return view('widgets.show')->withWidget($this->registry->get($typeId));
+        $item = $this->repository->find($id);
+        $widget = $this->registry->get($item->getTypeId());
+        $handle = $request->get('handle');
+        $inputPrefix = $request->get('input_prefix');
+
+        $vars = [
+            'widgetItem'        => $item,
+            'widget'            => $widget,
+            'hideCloseButton'   => true,
+            'draggable'         => false,
+            'editCall'          => 'changeWidgetItem(document.getElementById(\'$handle\'))',
+            'handle'            => $handle,
+            'inputPrefix'       => $inputPrefix
+        ];
+
+        return view('widget-items.partials.boxed-widget-item', $vars);
     }
 
     public function create($typeId)

@@ -9,6 +9,7 @@ use Cmsable\Model\SiteTreeNodeInterface;
 use Cmsable\Widgets\Contracts\Area;
 use Cmsable\Widgets\Contracts\WidgetItem;
 use Cmsable\Widgets\FormFields\WidgetListField;
+use Cmsable\Widgets\FormFields\WidgetSelectField;
 use Cmsable\Widgets\Repositories\WidgetTool;
 use ErrorException;
 use FormObject\Field\Selectable;
@@ -42,11 +43,11 @@ class WidgetAnchorPlugin extends Plugin
     private $widgetTool;
 
     /**
-     * @var WidgetListField
+     * @var WidgetSelectField
      */
     private $widgetField;
 
-    public function __construct(AreaRepository $areaRepository, WidgetTool $widgetTool, WidgetListField $widgetField)
+    public function __construct(AreaRepository $areaRepository, WidgetTool $widgetTool, WidgetSelectField $widgetField)
     {
         $this->areaRepository = $areaRepository;
         $this->widgetTool = $widgetTool;
@@ -86,7 +87,7 @@ class WidgetAnchorPlugin extends Plugin
                 }
             }
             if ($value) {
-                list($pageId, $areaName) = explode('|', $value);
+                list($pageId, $areaId, $areaName) = explode('|', $value);
                 foreach ($this->areaRepository->find(['page_id' => $pageId]) as $area) {
                     if ($area->getName() == $areaName) {
                         $this->widgetField->setArea($this->areaRepository->configure($area));
@@ -122,7 +123,7 @@ class WidgetAnchorPlugin extends Plugin
         return [$widget, $page];
     }
 
-    protected function configureListField(WidgetListField $field, SiteTreeNodeInterface $page)
+    protected function configureListField(WidgetSelectField $field, SiteTreeNodeInterface $page)
     {
         /** @var WidgetItem $widget */
         /** @var SiteTreeNodeInterface $targetPage */
@@ -141,6 +142,9 @@ class WidgetAnchorPlugin extends Plugin
     protected function createPageSelect(SiteTreeNodeInterface $page)
     {
         $field = new SelectOneField('redirect__redirect_target_i', trans('ems::sitetree-plugins.widget-anchor-plugin.area-containing-widgets'));
+
+        $field->addCssClass('widget-area-loader');
+        $field->setAttribute('data-replace-url', url(''));
 
         return $field->setSrc($this->getPageOptions($page));
 
@@ -171,7 +175,7 @@ class WidgetAnchorPlugin extends Plugin
             }
             /** @var Area $area */
             foreach ($areasByPageId[$pageId] as $area) {
-                $id = $pageId . '|' . $area->getName();
+                $id = $pageId . '|' . $area->getId() . '|' . $area->getName();
                 $options[$id] = $page->getMenuTitle() . ' (' . $area->getName() . ')';
             }
 

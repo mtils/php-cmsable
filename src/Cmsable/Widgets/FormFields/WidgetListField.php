@@ -3,36 +3,10 @@
 
 namespace Cmsable\Widgets\FormFields;
 
-use Cmsable\Widgets\Contracts\Area;
-use FormObject\Field;
-
-use Cmsable\Widgets\Contracts\AreaRepository;
-use Cmsable\Widgets\Contracts\AreaRenderer;
-use Cmsable\Model\SiteTreeNodeInterface as Page;
-
-class WidgetListField extends Field
+class WidgetListField extends AbstractWidgetField
 {
 
-    /**
-     * @var \Cmsable\Widgets\Contracts\AreaRepository
-     **/
-    protected $areaRepository;
-
-    /**
-     * @var \Cmsable\Widgets\Contracts\AreaRenderer
-     **/
-    protected $areaRenderer;
-
-    /**
-     * @var Area
-     */
-    private $area;
-
-    public function __construct(AreaRepository $areaRepository, AreaRenderer $areaRenderer)
-    {
-        $this->areaRepository = $areaRepository;
-        $this->areaRenderer = $areaRenderer;
-    }
+    private $editMode = self::MODE_MANAGE;
 
     public function getWidgetConfig()
     {
@@ -52,7 +26,8 @@ class WidgetListField extends Field
                 'handle' => $this->getForm()->getName() . '--'. $this->getName(),
                 'fullName' => $this->getName(),
                 'layoutName' => $this->getName() . "__layout",
-                'widgetConfigName' => $this->getName() . "__widget_config"
+                'widgetConfigName' => $this->getName() . "__widget_config",
+                'editMode'         => $this->editMode
             ];
             return $this->areaRenderer->renderEditArea($area, $vars);
         } catch (\Exception $e) {
@@ -61,39 +36,20 @@ class WidgetListField extends Field
 
     }
 
-    public function getArea()
+    /**
+     * @return string
+     */
+    public function getEditMode(): string
     {
-        if ($this->area) {
-            return $this->area;
-        }
-        if (!$page = $this->getPage()) {
-            return;
-        }
-
-        return $this->areaRepository->areaFor($page->getPageTypeId(),
-                                              $page->getIdentifier(),
-                                              $this->getPlainName());
+        return $this->editMode;
     }
 
-    public function setArea(Area $area=null)
+    /**
+     * @param string $editMode
+     */
+    public function setEditMode(string $editMode)
     {
-        $this->area = $area;
-        return $this;
+        $this->editMode = $editMode;
     }
 
-    protected function getPage()
-    {
-        if (!$form = $this->getForm()) {
-            return;
-        }
-
-        if (!$model = $form->getModel()) {
-            return;
-        }
-
-        if ($model instanceof Page) {
-            return $model;
-        }
-
-    }
 }

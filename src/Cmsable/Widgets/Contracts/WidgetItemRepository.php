@@ -60,4 +60,11 @@ interface WidgetItemRepository
      **/
     public function exists(WidgetItem $widget);
 
+    /**
+     * @param array $criteria (optional)
+     *
+     * @return WidgetItem[]
+     */
+    public function search(array $criteria=[]);
+
 }

@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use OutOfBoundsException;
 use InvalidArgumentException;
 use Illuminate\Database\Eloquent\Model;
@@ -181,6 +182,25 @@ class WidgetItemRepository implements RepositoryContract
         return true;
     }
 
+    /**
+     * @param array $criteria
+     * @return mixed
+     */
+    public function search(array $criteria = [])
+    {
+        $builder = $this->newQuery();
+        foreach ($criteria as $key=>$value) {
+            if (!in_array($key, ['area_id', 'type_id'])) {
+                continue;
+            }
+            $builder->where($key, $value);
+        }
+        /** @var  \Cmsable\Widgets\WidgetItem[] $result */
+        $result = $builder->get();
+        return $result;
+    }
+
+
     protected function generateId($typeId)
     {
         return implode($this->idSeparator, [$this->idPrefix, $typeId, uniqid()]);
@@ -219,4 +239,11 @@ class WidgetItemRepository implements RepositoryContract
         return $filtered;
     }
 
+    /**
+     * @return Builder
+     */
+    protected function newQuery()
+    {
+        return $this->model->newQuery();
+    }
 }

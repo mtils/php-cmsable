@@ -28,7 +28,8 @@ class WidgetController extends Controller
 
     /**
      * @param \Cmsable\Widgets\Contracts\Registry $registry
-     **/
+     * @param WidgetItemRepository $itemRepository
+     */
     public function __construct(Registry $registry, WidgetItemRepository $itemRepository)
     {
         $this->registry = $registry;
@@ -48,6 +49,8 @@ class WidgetController extends Controller
             'handle' => $request->input('handle'),
             'inputPrefix' => $request->input('input_prefix')
         ];
+
+        //$this->itemRepository
 
         return view('widgets.index', $vars);
     }
