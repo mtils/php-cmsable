@@ -65,7 +65,7 @@ class WidgetAnchorPlugin extends Plugin
         $mainFields->push($this->createPageSelect($page));//->before('content');
         $mainFields->offsetUnset('content');
 
-        $this->configureListField($this->widgetField, $page);
+        $this->configureWidgetField($this->widgetField, $page);
         $mainFields->push($this->widgetField);
 
     }
@@ -74,7 +74,7 @@ class WidgetAnchorPlugin extends Plugin
     {
         list($widget, $target) = $this->widgetAndRelatedPage($page);
         if ($target) {
-            $this->configureListField($this->widgetField, $target);
+            $this->configureWidgetField($this->widgetField, $target);
         } else {
             /** @var SelectOneField $targetSelect */
             $targetSelect = $form->get('main')->get('redirect__redirect_target_i');
@@ -94,7 +94,7 @@ class WidgetAnchorPlugin extends Plugin
                         break;
                     }
                 }
-                $this->widgetField->setName("widgets__$areaName");
+                $this->widgetField->setName("widget__select");
             }
         }
 
@@ -123,19 +123,17 @@ class WidgetAnchorPlugin extends Plugin
         return [$widget, $page];
     }
 
-    protected function configureListField(WidgetSelectField $field, SiteTreeNodeInterface $page)
+    protected function configureWidgetField(WidgetSelectField $field, SiteTreeNodeInterface $page)
     {
         /** @var WidgetItem $widget */
         /** @var SiteTreeNodeInterface $targetPage */
         list($widget, $targetPage) = $this->widgetAndRelatedPage($page);
-        $areaName = 'unknown';
         if ($widget && $widget->getLayout()) {
             /** @var Area $area */
             $area = $widget->getLayout();
-            $areaName = $area->getName();
             $field->setArea($area);
         }
-        $name = "widgets__$areaName";
+        $name = "widget__select";
         $field->setName($name);
     }
 
