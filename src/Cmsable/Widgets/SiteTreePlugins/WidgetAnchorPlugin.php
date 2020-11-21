@@ -2,28 +2,17 @@
 
 namespace Cmsable\Widgets\SiteTreePlugins;
 
-use BeeTree\Helper;
 use Cmsable\Controller\SiteTree\Plugin\Plugin;
-use Cmsable\Model\AdjacencyListSiteTreeModel;
 use Cmsable\Model\SiteTreeNodeInterface;
 use Cmsable\Widgets\Contracts\Area;
-use Cmsable\Widgets\Contracts\WidgetItem;
-use Cmsable\Widgets\FormFields\WidgetListField;
+use Cmsable\Widgets\Contracts\AreaRepository;
 use Cmsable\Widgets\FormFields\WidgetSelectField;
 use Cmsable\Widgets\Repositories\WidgetTool;
-use ErrorException;
-use FormObject\Field\Selectable;
+use Exception;
 use FormObject\Field\SelectableProxy;
 use FormObject\Field\SelectOneField;
 use FormObject\FieldList;
 use FormObject\Form;
-use Cmsable\Widgets\Contracts\AreaRepository;
-
-use function array_unique;
-use function explode;
-use function get_class;
-use function is_numeric;
-use function strpos;
 
 /**
  *  * Created by mtils on 08.11.20 at 10:16.
@@ -47,6 +36,13 @@ class WidgetAnchorPlugin extends Plugin
      */
     private $widgetField;
 
+    /**
+     * WidgetAnchorPlugin constructor.
+     *
+     * @param AreaRepository    $areaRepository
+     * @param WidgetTool        $widgetTool
+     * @param WidgetSelectField $widgetField
+     */
     public function __construct(AreaRepository $areaRepository, WidgetTool $widgetTool, WidgetSelectField $widgetField)
     {
         $this->areaRepository = $areaRepository;
@@ -55,105 +51,141 @@ class WidgetAnchorPlugin extends Plugin
     }
 
     /**
-     * @param FieldList             $fields
+     * @param FieldList $fields
      * @param SiteTreeNodeInterface $page
+     *
+     * @throws Exception
      */
     public function modifyFormFields(FieldList $fields, SiteTreeNodeInterface $page)
     {
         /** @var FieldList $mainFields */
         $mainFields = $fields('main');
-        $mainFields->push($this->createPageSelect($page));//->before('content');
+        $mainFields->push($this->createAreaSelect($page));//->before('content');
         $mainFields->offsetUnset('content');
-
-        $this->configureWidgetField($this->widgetField, $page);
-        $mainFields->push($this->widgetField);
-
+        $mainFields->push($this->widgetField->setName('widget__select'));
     }
 
+    /**
+     * @param Form                  $form
+     * @param SiteTreeNodeInterface $page
+     */
     public function fillForm(Form $form, SiteTreeNodeInterface $page)
     {
-        list($widget, $target) = $this->widgetAndRelatedPage($page);
-        if ($target) {
-            $this->configureWidgetField($this->widgetField, $target);
-        } else {
-            /** @var SelectOneField $targetSelect */
-            $targetSelect = $form->get('main')->get('redirect__redirect_target_i');
-            $value = $targetSelect->getValue();
-            if (!$value) {
-                /** @var SelectableProxy $item */
-                foreach ($targetSelect as $item) {
-                    $value = $item->getKey();
-                    break;
-                }
+        list($widget, $targetPage) = $this->widgetTool->widgetAndRelatedPage($page);
+
+        /** @var SelectOneField $areaSelect */
+        $areaSelect = $form->get('main')->get('redirect__redirect_target_i');
+        $area = null;
+
+        /** @var Area $area */
+        if (!$area = ($widget ? $widget->getLayout() : null)) {
+            $area = $this->guessAreaFromSelect($areaSelect);
+        }
+
+        if (!$area) {
+            return;
+        }
+
+        $this->areaRepository->configure($area);
+        $this->widgetField->setArea($area);
+
+        if ($targetPage) {
+            $areaSelect->setValue($this->widgetTool->createAreaPointer($targetPage, $area));
+        }
+
+        if ($widget) {
+            $this->widgetField->setValue($widget->getId());
+        }
+
+    }
+
+    /**
+     * Store anchor details in right places.
+     *
+     * @param Form $form
+     * @param SiteTreeNodeInterface $page
+     */
+    public function prepareSave(Form $form, SiteTreeNodeInterface $page)
+    {
+        $areaPointer = $this->widgetTool->parseAreaPointer(
+            $form['redirect__redirect_target_i']
+        );
+        $page->redirect_type = 'internal';
+        $page->redirect_target = $areaPointer['pageId'] . '#' . $this->widgetTool->widgetToAnchor($form['widget__select']);
+    }
+
+    /**
+     * Try to guess the area from $targetSelect
+     *
+     * @param SelectOneField $targetSelect
+     *
+     * @return Area|null
+     */
+    protected function guessAreaFromSelect(SelectOneField $targetSelect)
+    {
+        if (!$value = $targetSelect->getValue()) {
+            /** @var SelectableProxy $item */
+            foreach ($targetSelect as $item) {
+                $value = $item->getKey();
+                break;
             }
-            if ($value) {
-                list($pageId, $areaId, $areaName) = explode('|', $value);
-                foreach ($this->areaRepository->find(['page_id' => $pageId]) as $area) {
-                    if ($area->getName() == $areaName) {
-                        $this->widgetField->setArea($this->areaRepository->configure($area));
-                        break;
-                    }
-                }
-                $this->widgetField->setName("widget__select");
+        }
+
+        if (!$value) {
+            return null;
+        }
+
+        $areaInfo = $this->widgetTool->parseAreaPointer($value);
+
+        foreach ($this->areaRepository->find(['page_id' => $areaInfo['pageId']]) as $area) {
+            if ($area->getId() == $areaInfo['areaId'] || $area->getName() == $areaInfo['areaName']) {
+                return $area;
             }
         }
 
+        return null;
     }
 
-    protected function widgetAndRelatedPage(SiteTreeNodeInterface $redirectHolder)
+    /**
+     * Create the area select field.
+     *
+     * @param SiteTreeNodeInterface $page
+     *
+     * @return SelectOneField
+     * @throws Exception
+     */
+    protected function createAreaSelect(SiteTreeNodeInterface $page)
     {
-        $target = $redirectHolder->getRedirectTarget();
-        $pagePointer = $target;
-        $anchor = '';
-        if (strpos($target, '#')) {
-            list($pagePointer, $anchor) = explode('#', $target);
-        }
-        $widget = null;
-        $page = null;
-        if ($anchor) {
-            $widget = $this->widgetTool->widgetOfAnchor($anchor);
-        }
-        if (is_numeric($pagePointer)) {
-            $page = $this->createTreeModel($redirectHolder)->get($pagePointer);
-        }
-        if ($pagePointer == 'firstchild') {
-            $childNodes = $redirectHolder->childNodes();
-            $page = isset($childNodes[0]) ? $childNodes[0] : null;
-        }
-        return [$widget, $page];
-    }
-
-    protected function configureWidgetField(WidgetSelectField $field, SiteTreeNodeInterface $page)
-    {
-        /** @var WidgetItem $widget */
-        /** @var SiteTreeNodeInterface $targetPage */
-        list($widget, $targetPage) = $this->widgetAndRelatedPage($page);
-        if ($widget && $widget->getLayout()) {
-            /** @var Area $area */
-            $area = $widget->getLayout();
-            $field->setArea($area);
-        }
-        $name = "widget__select";
-        $field->setName($name);
-    }
-
-    protected function createPageSelect(SiteTreeNodeInterface $page)
-    {
-        $field = new SelectOneField('redirect__redirect_target_i', trans('ems::sitetree-plugins.widget-anchor-plugin.area-containing-widgets'));
+        $field = new SelectOneField(
+            'redirect__redirect_target_i',
+            trans(
+                'ems::sitetree-plugins.widget-anchor-plugin.area-containing-widgets'
+            )
+        );
 
         $field->addCssClass('widget-area-loader');
         $field->setAttribute('data-replace-url', url(''));
 
-        return $field->setSrc($this->getPageOptions($page));
-
+        return $field->setSrc($this->getAreaSelectOptions($page));
     }
 
-    protected function getPageOptions($page)
+    /**
+     * Return readable options to select an area from a page.
+     *
+     * @param SiteTreeNodeInterface $page
+     *
+     * @return array
+     */
+    protected function getAreaSelectOptions($page)
     {
         $scopeModelId = $page->{$page->rootIdColumn};
 
         if (!$pages = $this->widgetTool->pagesWithAreas($scopeModelId)) {
-            return ['0' => trans('ems::sitetree-plugins.widget-anchor-plugin.no-pages-with-areas')];
+            return [
+                '0' => trans(
+                    'ems::sitetree-plugins.widget-anchor-plugin.no-pages-with-areas'
+                )
+            ];
         }
 
         $areas = $this->widgetTool->areasInUse($scopeModelId);
@@ -173,19 +205,13 @@ class WidgetAnchorPlugin extends Plugin
             }
             /** @var Area $area */
             foreach ($areasByPageId[$pageId] as $area) {
-                $id = $pageId . '|' . $area->getId() . '|' . $area->getName();
-                $options[$id] = $page->getMenuTitle() . ' (' . $area->getName() . ')';
+                $id = $this->widgetTool->createAreaPointer($pageId, $area);
+                $options[$id] = $page->getMenuTitle() . ' (' . $area->getName(
+                    ) . ')';
             }
-
         }
 
         return $options;
-
-    }
-
-    protected function createTreeModel(SiteTreeNodeInterface $page)
-    {
-        return new AdjacencyListSiteTreeModel(get_class($page), $page->{$page->rootIdColumn});
     }
 
 }
