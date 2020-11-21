@@ -10,6 +10,7 @@ use Cmsable\Widgets\Contracts\Area as AreaContract;
 use Cmsable\Widgets\Contracts\Renderer;
 use Cmsable\Widgets\Contracts\AreaRenderer;
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Cmsable\Widgets\Contracts\AreaRepository;
 
 class ViewAreaRenderer implements AreaRenderer
 {
@@ -22,8 +23,10 @@ class ViewAreaRenderer implements AreaRenderer
     protected $view;
 
     /**
-     * @param Illuminate\Contracts\View\Factory $view
-     **/
+     * ViewAreaRenderer constructor.
+     * @param ViewFactory $view
+     * @param RegistryContract $registry
+     */
     public function __construct(ViewFactory $view, RegistryContract $registry)
     {
         $this->view = $view;

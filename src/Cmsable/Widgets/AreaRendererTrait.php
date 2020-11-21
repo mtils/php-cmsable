@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets;
 
+use Cmsable\Widgets\Repositories\WidgetTool;
 use OutOfBoundsException;
 use RuntimeException;
 use Cmsable\Widgets\Contracts\Area as AreaContract;
@@ -68,7 +69,9 @@ trait AreaRendererTrait
      **/
     public function render(ItemContract $item)
     {
-        return $this->registry()->get($item->getTypeId())->render($item);
+        $string = $this->registry()->get($item->getTypeId())->render($item);
+        $anchor = WidgetTool::ANCHOR_PREFIX . $item->getId();
+        return "<a class=\"widget-anchor\" id=\"$anchor\"></a>$string";
     }
 
     /**
