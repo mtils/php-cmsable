@@ -17,6 +17,12 @@ abstract class AbstractWidget implements Widget
 
     protected $validationFactory;
 
+    /**
+     * Here you can map widget keys (variable names) to names in your template.
+     *
+     * @var array
+     */
+    protected $widgetToViewVariable = [];
 
     /**
      * return an array of validation rules
@@ -111,6 +117,43 @@ abstract class AbstractWidget implements Widget
     public function isAllowedOn($pageTypeId, $areaName=AreaRepository::CONTENT)
     {
         return true;
+    }
+
+    /**
+     * Merge the data of $widgetItem with defaultData. Optionally rename the
+     * variables for passing them to the view/template.
+     *
+     * @param ItemContract $widgetItem
+     * @return array
+     */
+    protected function viewVars(ItemContract $widgetItem)
+    {
+        $defaultData = $this->defaultData();
+        $widgetData = $widgetItem->getData();
+        $merged = [];
+        foreach ($widgetData as $key => $value) {
+            if ($value !== null) {
+                $merged[$key] = $value;
+                continue;
+            }
+            if (isset($defaultData[$key])) {
+                $merged[$key] = $defaultData[$key];
+            }
+        }
+        foreach ($defaultData as $key=>$value) {
+            if (!isset($merged[$key])) {
+                $merged[$key] = $value;
+            }
+        }
+        foreach($this->widgetToViewVariable as $widgetKey=>$viewKey) {
+            if (!isset($merged[$widgetKey])) {
+                continue;
+            }
+            $merged[$viewKey] = $merged[$widgetKey];
+            unset($merged[$widgetKey]);
+        }
+        $merged['widgetItem'] = $widgetItem;
+        return $merged;
     }
 
     protected function createValidator($data, $rules)

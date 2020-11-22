@@ -18,7 +18,7 @@ class ViewAreaRenderer implements AreaRenderer
     use AreaRendererTrait;
 
     /**
-     * @var \Illuminate\Contracts\View\Factory
+     * @var ViewFactory
      **/
     protected $view;
 
@@ -36,7 +36,7 @@ class ViewAreaRenderer implements AreaRenderer
     /**
      * {@inheritdoc}
      *
-     * * @param \Cmsable\Widgets\Contracts\Area
+     * * @param AreaContract
      * @param array $vars (optional) view variabled
      * @return string
      **/
@@ -48,7 +48,7 @@ class ViewAreaRenderer implements AreaRenderer
     /**
      * {@inheritdoc}
      *
-     * @param \Cmsable\Widgets\Contracts\Area $area
+     * @param AreaContract $area
      * @param array $vars (optional) view variabled
      * @return string
      **/
@@ -89,7 +89,7 @@ class ViewAreaRenderer implements AreaRenderer
      * Render through the laravel view
      *
      * @param string $template
-     * @param \Cmsable\Widgets\Contracts\Area $area
+     * @param AreaContract $area
      * @param array $vars
      * @return string
      **/
