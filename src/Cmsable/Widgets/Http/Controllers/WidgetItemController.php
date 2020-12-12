@@ -12,6 +12,7 @@ use Ems\App\Helpers\ProvidesTexts;
 use Cmsable\View\Contracts\Notifier;
 use Cmsable\Widgets\Contracts\Registry;
 use Cmsable\Widgets\Contracts\WidgetItemRepository;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 
 class WidgetItemController extends Controller
 {
@@ -61,11 +62,12 @@ class WidgetItemController extends Controller
      * Shows a detailed view of one widget (for example a preview)
      *
      * @param Request $request
+     * @param ViewFactory $views
      * @param string $id
      *
      * @return View
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, ViewFactory $views, $id)
     {
         $item = $this->repository->find($id);
         $widget = $this->registry->get($item->getTypeId());
@@ -81,8 +83,7 @@ class WidgetItemController extends Controller
             'handle'            => $handle,
             'inputPrefix'       => $inputPrefix
         ];
-
-        return view('widget-items.partials.boxed-widget-item', $vars);
+        return view('widget-items.preview', $vars);
     }
 
     public function create($typeId)

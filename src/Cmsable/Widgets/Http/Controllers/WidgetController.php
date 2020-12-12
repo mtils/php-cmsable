@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets\Http\Controllers;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Contracts\Validation\ValidationException;
@@ -39,7 +40,7 @@ class WidgetController extends Controller
     /**
      * Shows a list of all available widgets
      *
-     * @return Illuminate\Contracts\View\View
+     * @return View
      **/
     public function index(Request $request)
     {
