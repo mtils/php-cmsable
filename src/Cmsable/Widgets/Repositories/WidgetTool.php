@@ -208,6 +208,19 @@ class WidgetTool
     }
 
     /**
+     * Return the html element id of an iframe to preview the widget (-item).
+     *
+     * @param WidgetItem $item
+     * @param string $handle
+     *
+     * @return string
+     */
+    public function iframeId(WidgetItem $item, string $handle): string
+    {
+        return "frame-$handle-" . $item->getId();
+    }
+
+    /**
      * Create the tree model for page.
      * TODO Hardcoded Adjacency/Eloquent model
      *

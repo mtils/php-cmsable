@@ -3,6 +3,7 @@
 
 namespace Cmsable\Widgets\Http\Controllers;
 
+use Cmsable\Widgets\Repositories\WidgetTool;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -13,6 +14,8 @@ use Ems\App\Helpers\ProvidesTexts;
 use Cmsable\View\Contracts\Notifier;
 use Cmsable\Widgets\Contracts\Registry;
 use Cmsable\Widgets\Contracts\WidgetItemRepository;
+
+use function str_replace;
 
 class WidgetController extends Controller
 {
@@ -69,18 +72,22 @@ class WidgetController extends Controller
 
     /**
      *
+     * @param Request $request
+     * @param WidgetTool $tool
      * @param string $typeId
-     * @return Illuminate\Contracts\View\View
-     **/
-    public function showIfValid(Request $request, $typeId)
+     *
+     * @return View
+     * @throws \Throwable
+     */
+    public function showIfValid(Request $request, WidgetTool $tool, $typeId)
     {
 
         $data = $request->all();
         $framed = false;
 
         if (isset($data['framed'])) {
+            $framed = $data['framed'] == 'false' ? false : (bool)$data['framed'];
             unset($data['framed']);
-            $framed = true;
         }
 
         $handle = $data['handle'];
@@ -104,10 +111,21 @@ class WidgetController extends Controller
             'widgetItem' => $item,
             'framed' => $framed,
             'handle' => $handle,
-            'inputPrefix' => $inputPrefix
+            'inputPrefix' => $inputPrefix,
+            'previewMode' => 'empty-iframe'
         ];
 
-        return view('widget-items.show', $vars);
+        $response = [
+            'preview'   => (string)$widget->render($item),
+            'data'      => $item->getData(),
+            'iframe-id' => $tool->iframeId($item, $handle),
+            'css'       => config('cmsable.cms-editor-css')
+        ];
+
+        if ($framed) {
+            $response['frame'] = (string)view('widget-items.partials.boxed-widget-item', $vars)->render();
+        }
+        return response()->json($response);
     }
 
     public function createItem(Request $request, $typeId)

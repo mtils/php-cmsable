@@ -71,17 +71,10 @@ class WidgetItemController extends Controller
     {
         $item = $this->repository->find($id);
         $widget = $this->registry->get($item->getTypeId());
-        $handle = $request->get('handle');
-        $inputPrefix = $request->get('input_prefix');
 
         $vars = [
             'widgetItem'        => $item,
-            'widget'            => $widget,
-            'hideCloseButton'   => true,
-            'draggable'         => false,
-            'editCall'          => 'changeWidgetItem(document.getElementById(\'$handle\'))',
-            'handle'            => $handle,
-            'inputPrefix'       => $inputPrefix
+            'widget'            => $widget
         ];
         return view('widget-items.preview', $vars);
     }
